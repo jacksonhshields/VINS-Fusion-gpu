@@ -392,26 +392,32 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
 
                 if(FLOW_BACK)
                 {   
-                    cv::cuda::GpuMat reverseLeft_gpu_Pts;
-                    cv::cuda::GpuMat status_gpu_RightLeft;
-                    cv::Ptr<cv::cuda::SparsePyrLKOpticalFlow> d_pyrLK_sparse = cv::cuda::SparsePyrLKOpticalFlow::create(
-                    cv::Size(21, 21), 3, 30, false);
-                    d_pyrLK_sparse->calc(right_gpu_Img, cur_gpu_img, cur_right_gpu_pts, reverseLeft_gpu_Pts, status_gpu_RightLeft);
+                    //cv::cuda::GpuMat reverseLeft_gpu_Pts;
+                    //cv::cuda::GpuMat status_gpu_RightLeft;
+                    //cv::Ptr<cv::cuda::SparsePyrLKOpticalFlow> d_pyrLK_sparse = cv::cuda::SparsePyrLKOpticalFlow::create(
+                    //cv::Size(21, 21), 3, 30, false);
+                    //d_pyrLK_sparse->calc(right_gpu_Img, cur_gpu_img, cur_right_gpu_pts, reverseLeft_gpu_Pts, status_gpu_RightLeft);
 
-                    vector<cv::Point2f> tmp_reverseLeft_Pts(reverseLeft_gpu_Pts.cols);
-                    reverseLeft_gpu_Pts.download(tmp_reverseLeft_Pts);
-                    reverseLeftPts = tmp_reverseLeft_Pts;
+                    //vector<cv::Point2f> tmp_reverseLeft_Pts(reverseLeft_gpu_Pts.cols);
+                    //reverseLeft_gpu_Pts.download(tmp_reverseLeft_Pts);
+                    //reverseLeftPts = tmp_reverseLeft_Pts;
 
-                    vector<uchar> tmp1_status(status_gpu_RightLeft.cols);
-                    status_gpu_RightLeft.download(tmp1_status);
-                    statusRightLeft = tmp1_status;
-                    for(size_t i = 0; i < status.size(); i++)
+                    //vector<uchar> tmp1_status(status_gpu_RightLeft.cols);
+                    //status_gpu_RightLeft.download(tmp1_status);
+                    //statusRightLeft = tmp1_status;
+                    int j = 0, k = 0;
+		    for(size_t i = 0; i < status.size(); i++)
                     {
-                        if(status[i] && statusRightLeft[i] && inBorder(cur_right_pts[i]) && distance(cur_pts[i], reverseLeftPts[i]) <= 0.5)
+                        //if(status[i] && statusRightLeft[i] && inBorder(cur_right_pts[i]) && distance(cur_pts[i], reverseLeftPts[i]) <= 0.5)
+			j++;
+			if(status[i] && (abs(0.1701*cur_right_pts[i].y - 0.1691*cur_pts[i].y + 2.8378) < EPIPOLAR_TOLERANCE) && cur_right_pts[i].x < cur_pts[i].x){
                             status[i] = 1;
+		            k++;
+			}
                         else
                             status[i] = 0;
                     }
+		    printf("stereo one way: %d, epipolar: %d \n",j,k);
                 }
                 // printf("gpu left right optical flow cost %fms\n",t_og1.toc());
             }

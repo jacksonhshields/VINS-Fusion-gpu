@@ -48,6 +48,7 @@ std::vector<std::string> CAM_NAMES;
 int MAX_CNT;
 int MIN_DIST;
 double F_THRESHOLD;
+float EPIPOLAR_TOLERANCE;
 int SHOW_TRACK;
 int FLOW_BACK;
 
@@ -89,6 +90,7 @@ void readParameters(std::string config_file)
     MAX_CNT = fsSettings["max_cnt"];
     MIN_DIST = fsSettings["min_dist"];
     F_THRESHOLD = fsSettings["F_threshold"];
+    EPIPOLAR_TOLERANCE = fsSettings["epipolar_tolerance"];
     SHOW_TRACK = fsSettings["show_track"];
     FLOW_BACK = fsSettings["flow_back"];
 

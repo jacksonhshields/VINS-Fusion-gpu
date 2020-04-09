@@ -66,6 +66,7 @@ extern std::vector<std::string> CAM_NAMES;
 extern int MAX_CNT;
 extern int MIN_DIST;
 extern double F_THRESHOLD;
+extern float EPIPOLAR_TOLERANCE;
 extern int SHOW_TRACK;
 extern int FLOW_BACK;
 
