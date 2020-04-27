@@ -410,7 +410,8 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                     {
                         //if(status[i] && statusRightLeft[i] && inBorder(cur_right_pts[i]) && distance(cur_pts[i], reverseLeftPts[i]) <= 0.5)
 			j++;
-			if(status[i] && (abs(0.1701*cur_right_pts[i].y - 0.1691*cur_pts[i].y + 2.8378) < EPIPOLAR_TOLERANCE) && cur_right_pts[i].x < cur_pts[i].x){
+			//if(status[i] && (abs(0.1703*cur_right_pts[i].y - 0.16913*cur_pts[i].y + 2.8569) < EPIPOLAR_TOLERANCE) && cur_right_pts[i].x < cur_pts[i].x){
+			if(status[i] && (abs(cur_right_pts[i].y - cur_pts[i].y) < EPIPOLAR_TOLERANCE) && cur_right_pts[i].x <= cur_pts[i].x){
                             status[i] = 1;
 		            k++;
 			}

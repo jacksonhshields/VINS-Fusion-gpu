@@ -24,18 +24,18 @@ body_T_cam0: !!opencv-matrix
    rows: 4
    cols: 4
    dt: d
-   data: [0.00013, 0.03264, 0.99946, 0.030,
-          0.05874, 0.99774,-0.03259, 0.080,
-         -0.99827, 0.05871,-0.00179, 0.075,
+   data: [ 0.0192,-0.0057, 0.9998, 0.030,
+          -0.0185, 0.9998, 0.0061, 0.080,
+          -0.9996,-0.0186, 0.0191, 0.070,
            0, 0, 0, 1]
 
 body_T_cam1: !!opencv-matrix
    rows: 4
    cols: 4
    dt: d
-   data: [-0.01403, 0.03440, 0.99930, 0.0267,
-           0.06740, 0.99717,-0.03338, 0.0942,
-          -0.99762, 0.06688,-0.01631,-0.1251,
+   data: [ 0.0045,-0.0050, 1.0000, 0.0298,
+          -0.0117, 0.9999, 0.0051, 0.0780,
+          -0.9999,-0.0117, 0.0047,-0.1308,
            0, 0, 0, 1]
 
 
@@ -45,24 +45,24 @@ use_gpu: 1
 use_gpu_acc_flow: 1
 
 #feature traker paprameters
-max_cnt: 350           # max feature number in feature tracking
+max_cnt: 500           # max feature number in feature tracking
 min_dist: 30           # min distance between two features 
 freq: 10                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
 F_threshold: 1.0        # ransac threshold (pixel)
-show_track: 0           # publish tracking image as topic
+show_track: 1           # publish tracking image as topic
 flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
 epipolar_tolerance: 2.0
 
 #optimization parameters
 max_solver_time: 0.04  # max solver itration time (ms), to guarantee real time
 max_num_iterations: 8   # max solver itrations, to guarantee real time
-keyframe_parallax: 10.0 # keyframe selection threshold (pixel)
+keyframe_parallax: 15.0 # keyframe selection threshold (pixel)
 
 #imu parameters       The more accurate parameters you provide, the better performance
 acc_n: 0.04158      # accelerometer measurement noise standard deviation. 0.00294 
-gyr_n: 0.0002475     # gyroscope measurement noise standard deviation. 0.000175     
+gyr_n: 0.002475     # gyroscope measurement noise standard deviation. 0.000175     
 acc_w: 0.0233      # accelerometer bias random work noise standard deviation.  
-gyr_w: 0.000134     # gyroscope bias random work noise standard deviation.     
+gyr_w: 0.00134     # gyroscope bias random work noise standard deviation.     
 g_norm: 9.806     # gravity magnitude
 
 #unsynchronization parameters

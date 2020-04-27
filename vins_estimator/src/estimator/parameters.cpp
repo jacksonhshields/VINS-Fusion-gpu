@@ -52,7 +52,6 @@ float EPIPOLAR_TOLERANCE;
 int SHOW_TRACK;
 int FLOW_BACK;
 
-
 template <typename T>
 T readParam(ros::NodeHandle &n, std::string name)
 {

@@ -10,7 +10,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+    cv_bridge
 )
+
+#find_package(OpenCV REQUIRED)
+include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
 
 find_package(Ceres REQUIRED)
 
