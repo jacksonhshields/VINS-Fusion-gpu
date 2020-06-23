@@ -16,9 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
     camera_models
     image_transport)
 
-#find_package(OpenCV REQUIRED)
-include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
-#message(WARNING "OpenCV_VERSION: ${OpenCV_VERSION}")
+find_package(OpenCV REQUIRED)
+#include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
+message(WARNING "OpenCV_VERSION: ${OpenCV_VERSION}")
 
 find_package(Ceres REQUIRED)
 

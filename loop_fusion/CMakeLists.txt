@@ -15,8 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
     roslib
     )
 
-#find_package(OpenCV)
-include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
+find_package(OpenCV)
+#include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
 
 
 find_package(Ceres REQUIRED)

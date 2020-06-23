@@ -13,8 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
 )
 
-#find_package(OpenCV REQUIRED)
-include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
+find_package(OpenCV REQUIRED)
+#include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
 
 find_package(Ceres REQUIRED)
 
@@ -34,4 +34,4 @@ add_executable(global_fusion_node
 	src/globalOptNode.cpp
 	src/globalOpt.cpp)
 
-target_link_libraries(global_fusion_node ${catkin_LIBRARIES} ${CERES_LIBRARIES} libGeographiccc) 
+target_link_libraries(global_fusion_node ${catkin_LIBRARIES} ${CERES_LIBRARIES} libGeographiccc ${OpenCV_LIBS}) 
