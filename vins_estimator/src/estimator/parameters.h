@@ -55,6 +55,8 @@ extern int MULTIPLE_THREAD;
 extern int USE_GPU;
 extern int USE_GPU_ACC_FLOW;
 extern int PUB_RECTIFY;
+extern std::string FISHEYE_MASK;
+extern int USE_MASK;
 extern Eigen::Matrix3d rectify_R_left;
 extern Eigen::Matrix3d rectify_R_right;
 // pts_gt for debug purpose;

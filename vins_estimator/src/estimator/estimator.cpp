@@ -42,6 +42,12 @@ void Estimator::setParameter()
     cout << "set g " << g.transpose() << endl;
     featureTracker.readIntrinsicParameter(CAM_NAMES);
 
+    if (USE_MASK)
+    {
+        featureTracker.loadMask(FISHEYE_MASK);
+
+    }
+
     std::cout << "MULTIPLE_THREAD is " << MULTIPLE_THREAD << '\n';
     if (MULTIPLE_THREAD)
     {

@@ -55,7 +55,10 @@ FeatureTracker::FeatureTracker()
 
 void FeatureTracker::setMask()
 {
-    mask = cv::Mat(row, col, CV_8UC1, cv::Scalar(255));
+    if(use_mask)
+        mask = fisheye_mask.clone();
+    else
+        mask = cv::Mat(ROW, COL, CV_8UC1, cv::Scalar(255));
 
     // prefer to keep features that are tracked for long time
     vector<pair<int, pair<cv::Point2f, int>>> cnt_pts_id;
@@ -742,4 +745,22 @@ void FeatureTracker::removeOutliers(set<int> &removePtsIds)
 cv::Mat FeatureTracker::getTrackImage()
 {
     return imTrack;
+}
+
+void FeatureTracker::loadMask(const string &filepath)
+{
+    fisheye_mask = cv::imread(filepath, 0);
+    if(!fisheye_mask.data)
+    {
+        ROS_INFO("load mask fail");
+        ROS_BREAK();
+    }
+    else
+    {
+        ROS_INFO("load mask success");
+        use_mask = true;
+    }
+
+
+
 }

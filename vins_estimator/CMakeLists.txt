@@ -16,7 +16,12 @@ find_package(catkin REQUIRED COMPONENTS
     camera_models
     image_transport)
 
-find_package(OpenCV REQUIRED)
+#find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED
+NO_MODULE # should be optional, tells CMake to use config mode
+PATHS /usr/local # look here
+NO_DEFAULT_PATH) # and don't look anywhere else
+
 #include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
 message(WARNING "OpenCV_VERSION: ${OpenCV_VERSION}")
 
