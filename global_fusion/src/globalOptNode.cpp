@@ -14,6 +14,7 @@
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/FluidPressure.h>
 #include <sensor_msgs/MagneticField.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <eigen3/Eigen/Dense>
@@ -92,6 +93,14 @@ void pressure_callback(const sensor_msgs::FluidPressureConstPtr &pressure_msg)
 	globalEstimator.inputPressure(t, pressure, pressure_var);
 }
 
+void depth_callback(const geometry_msgs::Vector3StampedConstPtr &depth_msg)
+{
+    double t = depth_msg->header.stamp.toSec();
+    double depth = -depth_msg->vector.z;
+    double depth_var = 0.01;
+    globalEstimator.inputDepth(t, depth, depth_var);
+}
+
 void compass_callback(const sensor_msgs::MagneticFieldConstPtr &compass_msg)
 {
 	double t = compass_msg->header.stamp.toSec();
@@ -154,9 +163,11 @@ int main(int argc, char **argv)
     int USE_GPS;
     int USE_COMPASS;
     int USE_PRESSURE;
+    int USE_DEPTH;
     std::string GPS_TOPIC;
     std::string PRESSURE_TOPIC;
     std::string COMPASS_TOPIC;
+    std::string DEPTH_TOPIC;
     
     string config_file = argv[1];
     printf("config_file: %s\n", argv[1]);
@@ -169,15 +180,24 @@ int main(int argc, char **argv)
     USE_GPS = fsSettings["use_gps"];
     USE_COMPASS = fsSettings["use_compass"];
     USE_PRESSURE = fsSettings["use_pressure"];
+    USE_DEPTH = fsSettings["use_depth"];
+    if (USE_PRESSURE && USE_DEPTH)
+    {
+        std::cerr << "ERROR: Cannot use both pressure and depth." << std::endl;
+        return 1;
+    }
+
     fsSettings["gps_topic"] >> GPS_TOPIC;
     fsSettings["pressure_topic"] >> PRESSURE_TOPIC;
     fsSettings["compass_topic"] >> COMPASS_TOPIC;
+    fsSettings["depth_topic"] >> DEPTH_TOPIC;
     fsSettings.release();
 
     global_path = &globalEstimator.global_path;
     
     ros::Subscriber sub_GPS;
     ros::Subscriber sub_depth;
+    ros::Subscriber sub_pressure;
     ros::Subscriber sub_compass;
 
     if(USE_GPS)
@@ -191,10 +211,22 @@ int main(int argc, char **argv)
     if(USE_PRESSURE){
         std::cout << "subscribing to: " << PRESSURE_TOPIC;
         printf("\n");
-    	sub_depth = n.subscribe(PRESSURE_TOPIC, 1000, pressure_callback);
+    	sub_pressure = n.subscribe(PRESSURE_TOPIC, 1000, pressure_callback);
     } else {
         printf("no depth\n");
     }
+
+    if(USE_DEPTH){
+        std::cout << "subscribing to: " << DEPTH_TOPIC;
+        printf("\n");
+        sub_pressure = n.subscribe(DEPTH_TOPIC, 1000, depth_callback);
+    } else {
+        printf("no depth\n");
+    }
+
+
+
+
     if(USE_COMPASS){
         std::cout << "subscribing to: " << COMPASS_TOPIC;
         printf("\n");

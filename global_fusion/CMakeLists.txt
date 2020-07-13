@@ -10,7 +10,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-    cv_bridge
+  cv_bridge
+  geometry_msgs
+  sensor_msgs
 )
 
 #find_package(OpenCV REQUIRED)

@@ -18,6 +18,7 @@ GlobalOptimization::GlobalOptimization()
 	initGPS = false;
 	initPress = false;
 	initCompass = false;
+	initDepth = false;
     newGPS = false;
 	newDepth = false;
 	newCompass = false;
@@ -130,6 +131,17 @@ void GlobalOptimization::inputPressure(double t, double pressure, double pressur
 	vector<double> tmp{-depth, pressure_var*0.000001/density};
 	depthMap[t] = tmp;
 	newDepth = true;
+}
+
+void GlobalOptimization::inputDepth(double t, double depth, double depth_var)
+{
+    if(!initDepth){
+        d_0 = depth;
+        initDepth = true;
+    }
+    vector<double> tmp{depth, depth_var};
+    depthMap[t] = tmp;
+    newDepth = true;
 }
 
 
