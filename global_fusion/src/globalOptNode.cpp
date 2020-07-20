@@ -97,7 +97,7 @@ void depth_callback(const geometry_msgs::Vector3StampedConstPtr &depth_msg)
 {
     double t = depth_msg->header.stamp.toSec();
     double depth = -depth_msg->vector.z;
-    double depth_var = 0.01;
+    double depth_var = 0.0001;
     globalEstimator.inputDepth(t, depth, depth_var);
 }
 

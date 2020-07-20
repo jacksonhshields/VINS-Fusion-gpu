@@ -30,13 +30,13 @@ struct DepthError
 	template <typename T>
 	bool operator()(const T* tj, T* residuals) const
 	{
-//        residuals[0] = (tj[0] - T(depth))*0.0;
-//        residuals[1] = (tj[1] - T(depth))*0.0;
-//        residuals[2] = (tj[2] - T(depth))/ T(var);
-        // Tx2 is rotated in f1
         residuals[0] = (tj[0] - T(depth))*0.0;
-        residuals[1] = (tj[1] - T(depth))/T(var);
-		residuals[2] = (tj[2] - T(depth))*0.0;
+        residuals[1] = (tj[1] - T(depth))*0.0;
+        residuals[2] = (tj[2] - T(depth))/ T(var);
+        // Tx2 is rotated in f1
+//        residuals[0] = (tj[0] - T(depth))*0.0;
+//        residuals[1] = (tj[1] - T(depth))/T(var);
+//		residuals[2] = (tj[2] - T(depth))*0.0;
 
 
 
