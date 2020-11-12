@@ -13,6 +13,12 @@
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 
+
+double mag_w[3];
+double imu_q_c[4];
+double imu_t_depth[3];
+
+
 template <typename T> inline
 void QuaternionInverse(const T q[4], T q_inverse[4])
 {
@@ -22,30 +28,109 @@ void QuaternionInverse(const T q[4], T q_inverse[4])
 	q_inverse[3] = -q[3];
 };
 
+struct DepthError
+{
+	DepthError(double depth, double var)
+		:depth(depth), var(var){}
+
+	template <typename T>
+	bool operator()(const T* w_q_i, const T* zj, T* residuals) const
+	{
+        //residuals[0] = (tj[0] - T(depth))*0.0;
+        //residuals[1] = (tj[1] - T(depth))*0.0;
+	    T i_t_depth[3];
+		T w_i_t_depth[3];
+
+		i_t_depth[0] = T(imu_t_depth[0]);
+		i_t_depth[1] = T(imu_t_depth[1]);
+		i_t_depth[2] = T(imu_t_depth[2]);
+		ceres::QuaternionRotatePoint(w_q_i, i_t_depth, w_i_t_depth);
+				
+		residuals[0] = (zj[2] + w_i_t_depth[2] - T(depth))/ T(var);
+
+	    return true;
+	}
+        static ceres::CostFunction* Create(const double depth, const double var)
+        {
+          return (new ceres::AutoDiffCostFunction<
+                  DepthError, 1, 4, 3>(
+                        new DepthError(depth, var)));
+        }
+
+        double depth, var;
+};
+
+struct CompassError
+{
+        CompassError(double mag_x, double mag_y, double mag_z,double var)
+                                  :mag_x(mag_x), mag_y(mag_y), mag_z(mag_z), var(var){}
+
+	    template <typename T>
+        bool operator()(const T* w_q_i, T* residuals) const
+        {
+		    T c_q_w[4];
+			T w_q_c[4];
+			T i_q_c[4];
+
+			i_q_c[0] = T(imu_q_c[0]);
+			i_q_c[1] = T(imu_q_c[1]);
+			i_q_c[2] = T(imu_q_c[2]);
+			i_q_c[3] = T(imu_q_c[3]);
+
+			ceres::QuaternionProduct(w_q_i, i_q_c, w_q_c);
+            QuaternionInverse(w_q_c, c_q_w);
+						
+		    T mag_c[3];
+			T mag_world[3];
+			mag_world[0] = T(mag_w[0]);
+			mag_world[1] = T(mag_w[1]);
+			mag_world[2] = T(mag_w[2]); 
+            ceres::QuaternionRotatePoint(c_q_w, mag_world, mag_c);
+
+            residuals[0] = (mag_c[0] - T(mag_x)) / T(var);
+            residuals[1] = (mag_c[1] - T(mag_y)) / T(var);
+            residuals[2] = (mag_c[2] - T(mag_z)) / T(var);
+
+            return true;
+        }
+
+    	static ceres::CostFunction* Create(const double mag_x, const double mag_y, const double mag_z, const double var)
+        {
+          return (new ceres::AutoDiffCostFunction<
+                  CompassError, 3, 4>(
+                        new CompassError(mag_x, mag_y, mag_z, var)));
+        }
+
+        double mag_x, mag_y, mag_z, var;
+
+
+};
+
 
 struct TError
 {
-	TError(double t_x, double t_y, double t_z, double var)
-				  :t_x(t_x), t_y(t_y), t_z(t_z), var(var){}
+	TError(double t_x, double t_y, double t_z, double var_x, double var_y, double var_z)
+				  :t_x(t_x), t_y(t_y), t_z(t_z), var_x(var_x), var_y(var_y), var_z(var_z){}
 
 	template <typename T>
 	bool operator()(const T* tj, T* residuals) const
 	{
-		residuals[0] = (tj[0] - T(t_x)) / T(var);
-		residuals[1] = (tj[1] - T(t_y)) / T(var);
-		residuals[2] = (tj[2] - T(t_z)) / T(var);
+
+		residuals[0] = (tj[0] - T(t_x)) / T(var_x);
+		residuals[1] = (tj[1] - T(t_y)) / T(var_y);
+		//residuals[2] = (tj[2] - T(t_z)) / T(var_z);
 
 		return true;
 	}
 
-	static ceres::CostFunction* Create(const double t_x, const double t_y, const double t_z, const double var) 
+	static ceres::CostFunction* Create(const double t_x, const double t_y, const double t_z, const double var_x, const double var_y, const double var_z) 
 	{
 	  return (new ceres::AutoDiffCostFunction<
-	          TError, 3, 3>(
-	          	new TError(t_x, t_y, t_z, var)));
+	          TError, 2, 3>(
+	          	new TError(t_x, t_y, t_z, var_x, var_y, var_z)));
 	}
 
-	double t_x, t_y, t_z, var;
+	double t_x, t_y, t_z, var_x, var_y, var_z;
 
 };
 
