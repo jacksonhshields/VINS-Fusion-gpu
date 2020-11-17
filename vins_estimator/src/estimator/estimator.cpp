@@ -1053,20 +1053,48 @@ void Estimator::optimization()
 
     ceres::Solver::Options options;
 
-    options.linear_solver_type = ceres::DENSE_SCHUR;
-    //options.num_threads = 2;
-    options.trust_region_strategy_type = ceres::DOGLEG;
+    // Covriance estimation
+    options.linear_solver_type = ceres::ITERATIVE_SCHUR;
+    options.preconditioner_type = ceres::SCHUR_JACOBI;
+    options.use_explicit_schur_complement = true;
+    options.num_threads = 6;
+//    options.trust_region_strategy_type = ceres::DOGLEG;
     options.max_num_iterations = NUM_ITERATIONS;
-    //options.use_explicit_schur_complement = true;
-    //options.minimizer_progress_to_stdout = true;
-    //options.use_nonmonotonic_steps = true;
+
+
     if (marginalization_flag == MARGIN_OLD)
         options.max_solver_time_in_seconds = SOLVER_TIME * 4.0 / 5.0;
     else
         options.max_solver_time_in_seconds = SOLVER_TIME;
+
     TicToc t_solver;
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
+
+    // Covariance Estimation!
+    TicToc t_cov;
+
+    cout << "Total cost time: " << summary.total_time_in_seconds <<
+         " | linear solver: " << summary.linear_solver_time_in_seconds <<
+         " | TrustRegionMinimizer time: " << summary.minimizer_time_in_seconds << endl;
+    printf("solver costs: %f \n", t_solver.toc());
+
+// Covariance of poses
+    ceres::Covariance::Options cov_options;
+    cov_options.num_threads = 6;
+    ceres::Covariance covariance(cov_options);
+
+    std::vector<std::pair<const double *, const double *>> covariance_blocks;
+    covariance_blocks.emplace_back(para_Pose[WINDOW_SIZE], para_Pose[WINDOW_SIZE]);
+//        CHECK(covariance.Compute(covariance_blocks, &problem));
+    if(covariance.Compute(covariance_blocks, &problem)) {
+        double covariance_pose[SIZE_POSE * SIZE_POSE];
+        covariance.GetCovarianceBlock(para_Pose[WINDOW_SIZE], para_Pose[WINDOW_SIZE], covariance_pose);
+        for (auto x = std::begin(covariance_pose); x != std::end(covariance_pose);)
+            cout << *++x << " " << endl;
+        printf("covariance solver costs: %f \n", t_cov.toc());
+    }
+
     //cout << summary.BriefReport() << endl;
     ROS_DEBUG("Iterations : %d", static_cast<int>(summary.iterations.size()));
     //printf("solver costs: %f \n", t_solver.toc());
