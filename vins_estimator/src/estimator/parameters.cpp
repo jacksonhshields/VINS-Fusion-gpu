@@ -37,6 +37,7 @@ int STEREO;
 int USE_IMU;
 int MULTIPLE_THREAD;
 int USE_GPU;
+int USE_MASK;
 int USE_GPU_ACC_FLOW;
 int PUB_RECTIFY;
 Eigen::Matrix3d rectify_R_left;
@@ -48,9 +49,9 @@ std::vector<std::string> CAM_NAMES;
 int MAX_CNT;
 int MIN_DIST;
 double F_THRESHOLD;
+float EPIPOLAR_TOLERANCE;
 int SHOW_TRACK;
 int FLOW_BACK;
-
 
 template <typename T>
 T readParam(ros::NodeHandle &n, std::string name)
@@ -89,6 +90,7 @@ void readParameters(std::string config_file)
     MAX_CNT = fsSettings["max_cnt"];
     MIN_DIST = fsSettings["min_dist"];
     F_THRESHOLD = fsSettings["F_threshold"];
+    EPIPOLAR_TOLERANCE = fsSettings["epipolar_tolerance"];
     SHOW_TRACK = fsSettings["show_track"];
     FLOW_BACK = fsSettings["flow_back"];
 
@@ -96,6 +98,9 @@ void readParameters(std::string config_file)
 
     USE_GPU = fsSettings["use_gpu"];
     USE_GPU_ACC_FLOW = fsSettings["use_gpu_acc_flow"];
+
+    USE_MASK = fsSettings["use_mask"];
+    fsSettings["fisheye_mask"] >> FISHEYE_MASK;
 
     USE_IMU = fsSettings["imu"];
     printf("USE_IMU: %d\n", USE_IMU);

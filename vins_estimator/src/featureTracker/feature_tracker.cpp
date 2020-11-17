@@ -55,7 +55,10 @@ FeatureTracker::FeatureTracker()
 
 void FeatureTracker::setMask()
 {
-    mask = cv::Mat(row, col, CV_8UC1, cv::Scalar(255));
+    if(use_mask)
+        mask = fisheye_mask.clone();
+    else
+        mask = cv::Mat(ROW, COL, CV_8UC1, cv::Scalar(255));
 
     // prefer to keep features that are tracked for long time
     vector<pair<int, pair<cv::Point2f, int>>> cnt_pts_id;
@@ -392,26 +395,33 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
 
                 if(FLOW_BACK)
                 {   
-                    cv::cuda::GpuMat reverseLeft_gpu_Pts;
-                    cv::cuda::GpuMat status_gpu_RightLeft;
-                    cv::Ptr<cv::cuda::SparsePyrLKOpticalFlow> d_pyrLK_sparse = cv::cuda::SparsePyrLKOpticalFlow::create(
-                    cv::Size(21, 21), 3, 30, false);
-                    d_pyrLK_sparse->calc(right_gpu_Img, cur_gpu_img, cur_right_gpu_pts, reverseLeft_gpu_Pts, status_gpu_RightLeft);
+                    //cv::cuda::GpuMat reverseLeft_gpu_Pts;
+                    //cv::cuda::GpuMat status_gpu_RightLeft;
+                    //cv::Ptr<cv::cuda::SparsePyrLKOpticalFlow> d_pyrLK_sparse = cv::cuda::SparsePyrLKOpticalFlow::create(
+                    //cv::Size(21, 21), 3, 30, false);
+                    //d_pyrLK_sparse->calc(right_gpu_Img, cur_gpu_img, cur_right_gpu_pts, reverseLeft_gpu_Pts, status_gpu_RightLeft);
 
-                    vector<cv::Point2f> tmp_reverseLeft_Pts(reverseLeft_gpu_Pts.cols);
-                    reverseLeft_gpu_Pts.download(tmp_reverseLeft_Pts);
-                    reverseLeftPts = tmp_reverseLeft_Pts;
+                    //vector<cv::Point2f> tmp_reverseLeft_Pts(reverseLeft_gpu_Pts.cols);
+                    //reverseLeft_gpu_Pts.download(tmp_reverseLeft_Pts);
+                    //reverseLeftPts = tmp_reverseLeft_Pts;
 
-                    vector<uchar> tmp1_status(status_gpu_RightLeft.cols);
-                    status_gpu_RightLeft.download(tmp1_status);
-                    statusRightLeft = tmp1_status;
-                    for(size_t i = 0; i < status.size(); i++)
+                    //vector<uchar> tmp1_status(status_gpu_RightLeft.cols);
+                    //status_gpu_RightLeft.download(tmp1_status);
+                    //statusRightLeft = tmp1_status;
+                    int j = 0, k = 0;
+		    for(size_t i = 0; i < status.size(); i++)
                     {
-                        if(status[i] && statusRightLeft[i] && inBorder(cur_right_pts[i]) && distance(cur_pts[i], reverseLeftPts[i]) <= 0.5)
+                        //if(status[i] && statusRightLeft[i] && inBorder(cur_right_pts[i]) && distance(cur_pts[i], reverseLeftPts[i]) <= 0.5)
+			j++;
+			//if(status[i] && (abs(0.1703*cur_right_pts[i].y - 0.16913*cur_pts[i].y + 2.8569) < EPIPOLAR_TOLERANCE) && cur_right_pts[i].x < cur_pts[i].x){
+			if(status[i] && (abs(cur_right_pts[i].y - cur_pts[i].y) < EPIPOLAR_TOLERANCE) && cur_right_pts[i].x <= cur_pts[i].x){
                             status[i] = 1;
+		            k++;
+			}
                         else
                             status[i] = 0;
                     }
+		    printf("stereo one way: %d, epipolar: %d \n",j,k);
                 }
                 // printf("gpu left right optical flow cost %fms\n",t_og1.toc());
             }
@@ -432,6 +442,8 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
         }
         prev_un_right_pts_map = cur_un_right_pts_map;
     }
+
+    // Publish to topic instead
     if(SHOW_TRACK)
         drawTrack(cur_img, rightImg, ids, cur_pts, cur_right_pts, prevLeftPtsMap);
 
@@ -684,8 +696,8 @@ void FeatureTracker::drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight,
     //cv::Mat imCur2Compress;
     //cv::resize(imCur2, imCur2Compress, cv::Size(cols, rows / 2));
 
-    cv::imshow("tracking", imTrack);
-    cv::waitKey(2);
+//    cv::imshow("tracking", imTrack);
+//    cv::waitKey(2);
 }
 
 
@@ -735,4 +747,22 @@ void FeatureTracker::removeOutliers(set<int> &removePtsIds)
 cv::Mat FeatureTracker::getTrackImage()
 {
     return imTrack;
+}
+
+void FeatureTracker::loadMask(const string &filepath)
+{
+    fisheye_mask = cv::imread(filepath, 0);
+    if(!fisheye_mask.data)
+    {
+        ROS_INFO("load mask fail");
+        ROS_BREAK();
+    }
+    else
+    {
+        ROS_INFO("load mask success");
+        use_mask = true;
+    }
+
+
+
 }

@@ -22,6 +22,36 @@ void QuaternionInverse(const T q[4], T q_inverse[4])
 	q_inverse[3] = -q[3];
 };
 
+struct DepthError
+{
+	DepthError(double depth, double var)
+		:depth(depth), var(var){}
+
+	template <typename T>
+	bool operator()(const T* tj, T* residuals) const
+	{
+        residuals[0] = (tj[0] - T(depth))*0.0;
+        residuals[1] = (tj[1] - T(depth))*0.0;
+        residuals[2] = (tj[2] - T(depth))/ T(var);
+        // Tx2 is rotated in f1
+//        residuals[0] = (tj[0] - T(depth))*0.0;
+//        residuals[1] = (tj[1] - T(depth))/T(var);
+//		residuals[2] = (tj[2] - T(depth))*0.0;
+
+
+
+		return true;
+	}
+        static ceres::CostFunction* Create(const double depth, const double var)
+        {
+          return (new ceres::AutoDiffCostFunction<
+                  DepthError, 3, 3>(
+                        new DepthError(depth, var)));
+        }
+
+        double depth, var;
+};
+
 
 struct TError
 {

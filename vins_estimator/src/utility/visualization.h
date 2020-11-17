@@ -27,6 +27,8 @@
 #include "../estimator/estimator.h"
 #include "../estimator/parameters.h"
 #include <fstream>
+#include <cv_bridge/cv_bridge.h>
+
 
 extern ros::Publisher pub_odometry;
 extern ros::Publisher pub_path, pub_pose;
@@ -61,3 +63,5 @@ void pubKeyframe(const Estimator &estimator);
 void pubRelocalization(const Estimator &estimator);
 
 void pubCar(const Estimator & estimator, const std_msgs::Header &header);
+
+void pubTrackImage(const cv::Mat &imgTrack, const double t);

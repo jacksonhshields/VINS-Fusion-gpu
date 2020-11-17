@@ -55,6 +55,8 @@ extern int MULTIPLE_THREAD;
 extern int USE_GPU;
 extern int USE_GPU_ACC_FLOW;
 extern int PUB_RECTIFY;
+extern std::string FISHEYE_MASK;
+extern int USE_MASK;
 extern Eigen::Matrix3d rectify_R_left;
 extern Eigen::Matrix3d rectify_R_right;
 // pts_gt for debug purpose;
@@ -66,6 +68,7 @@ extern std::vector<std::string> CAM_NAMES;
 extern int MAX_CNT;
 extern int MIN_DIST;
 extern double F_THRESHOLD;
+extern float EPIPOLAR_TOLERANCE;
 extern int SHOW_TRACK;
 extern int FLOW_BACK;
 
