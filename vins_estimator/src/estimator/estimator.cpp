@@ -1055,6 +1055,7 @@ void Estimator::optimization()
 
     // Covriance estimation
     options.linear_solver_type = ceres::ITERATIVE_SCHUR;
+//    options.linear_solver_type = ceres::ITERATIVE_SCHUR;
     options.preconditioner_type = ceres::SCHUR_JACOBI;
     options.use_explicit_schur_complement = true;
     options.num_threads = 6;
@@ -1088,11 +1089,15 @@ void Estimator::optimization()
     covariance_blocks.emplace_back(para_Pose[WINDOW_SIZE], para_Pose[WINDOW_SIZE]);
 //        CHECK(covariance.Compute(covariance_blocks, &problem));
     if(covariance.Compute(covariance_blocks, &problem)) {
-        double covariance_pose[SIZE_POSE * SIZE_POSE];
-        covariance.GetCovarianceBlock(para_Pose[WINDOW_SIZE], para_Pose[WINDOW_SIZE], covariance_pose);
-        for (auto x = std::begin(covariance_pose); x != std::end(covariance_pose);)
-            cout << *++x << " " << endl;
-        printf("covariance solver costs: %f \n", t_cov.toc());
+//        double covariance_pose[SIZE_POSE * SIZE_POSE];
+        covariance.GetCovarianceBlock(para_Pose[WINDOW_SIZE], para_Pose[WINDOW_SIZE], covariance_pose_);
+//        for (auto x = std::begin(covariance_pose); x != std::end(covariance_pose);)
+//            cout << *++x << " " << endl;
+//        printf("covariance solver costs: %f \n", t_cov.toc());
+    }
+    else {
+        for (auto x = std::begin(covariance_pose_); x != std::end(covariance_pose_); x++)
+            *x = 0.0;
     }
 
     //cout << summary.BriefReport() << endl;
