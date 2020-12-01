@@ -408,14 +408,19 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                     //vector<uchar> tmp1_status(status_gpu_RightLeft.cols);
                     //status_gpu_RightLeft.download(tmp1_status);
                     //statusRightLeft = tmp1_status;
-                    int j = 0, k = 0;
+	            cur_un_right_pts = undistortedPts(cur_right_pts, m_camera[1]);
+		    int j = 0, k = 0;
 		    for(size_t i = 0; i < status.size(); i++)
                     {
                         //if(status[i] && statusRightLeft[i] && inBorder(cur_right_pts[i]) && distance(cur_pts[i], reverseLeftPts[i]) <= 0.5)
-			j++;
+			if(status[i]){
+				j++;
+			}
 			//if(status[i] && (abs(0.1703*cur_right_pts[i].y - 0.16913*cur_pts[i].y + 2.8569) < EPIPOLAR_TOLERANCE) && cur_right_pts[i].x < cur_pts[i].x){
-			if(status[i] && (abs(cur_right_pts[i].y - cur_pts[i].y) < EPIPOLAR_TOLERANCE) && cur_right_pts[i].x <= cur_pts[i].x){
-                            status[i] = 1;
+			if(status[i] && (abs(cur_un_right_pts[i].y - cur_un_pts[i].y) < EPIPOLAR_TOLERANCE) && cur_un_right_pts[i].x <= cur_un_pts[i].x){
+		            //printf("stereo_disparity %f\n",abs(cur_un_right_pts[i].y - cur_un_pts[i].y));
+		            status[i] = 1;
+
 		            k++;
 			}
                         else
@@ -427,6 +432,7 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
             }
             ids_right = ids;
             reduceVector(cur_right_pts, status);
+	    reduceVector(cur_un_right_pts, status);
             reduceVector(ids_right, status);
             // only keep left-right pts
             /*
@@ -436,7 +442,7 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
             reduceVector(cur_un_pts, status);
             reduceVector(pts_velocity, status);
             */
-            cur_un_right_pts = undistortedPts(cur_right_pts, m_camera[1]);
+	    //cur_un_right_pts = undistortedPts(cur_right_pts, m_camera[1]);
             right_pts_velocity = ptsVelocity(ids_right, cur_un_right_pts, cur_un_right_pts_map, prev_un_right_pts_map);
             
         }
