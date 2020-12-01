@@ -49,6 +49,7 @@ struct DepthError
 		residuals[0] = (zj[2] + w_i_t_depth[2] - T(depth))/ T(var);
 
 	    return true;
+
 	}
         static ceres::CostFunction* Create(const double depth, const double var)
         {
@@ -105,6 +106,7 @@ struct CompassError
 
 
 };
+
 
 
 struct TError

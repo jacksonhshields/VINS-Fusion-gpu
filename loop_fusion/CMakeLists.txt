@@ -15,9 +15,18 @@ find_package(catkin REQUIRED COMPONENTS
     roslib
     )
 
-#find_package(OpenCV)
-include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
+<<<<<<< HEAD
+find_package(OpenCV)
+#include(/home/dji/opencv/build/OpenCVConfig.cmake)
 
+=======
+#find_package(OpenCV)
+#include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
+find_package(OpenCV REQUIRED
+NO_MODULE # should be optional, tells CMake to use config mode
+PATHS /usr/local # look here
+NO_DEFAULT_PATH) # and don't look anywhere else
+>>>>>>> depth
 
 find_package(Ceres REQUIRED)
 

@@ -25,6 +25,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/eigen.hpp>
+
 //#include "parameters.h"
 
 GlobalOptimization globalEstimator;
@@ -32,6 +33,7 @@ ros::Publisher pub_global_odometry, pub_global_path, pub_car;
 nav_msgs::Path *global_path;
 
 int compass_counter = 0;
+
 
 void publish_car_model(double t, Eigen::Vector3d t_w_car, Eigen::Quaterniond q_w_car)
 {
@@ -113,6 +115,34 @@ void compass_callback(const geometry_msgs::Vector3StampedConstPtr &compass_msg)
 	compass_counter = 0;
 }
 
+void pressure_callback(const sensor_msgs::FluidPressureConstPtr &pressure_msg)
+{
+    //printf("pressure callback! \n");
+	double t = pressure_msg->header.stamp.toSec();
+	double pressure = pressure_msg->fluid_pressure;
+	double pressure_var = pressure_msg->variance;
+	globalEstimator.inputPressure(t, pressure, pressure_var);
+}
+
+void depth_callback(const geometry_msgs::Vector3StampedConstPtr &depth_msg)
+{
+    double t = depth_msg->header.stamp.toSec();
+    double depth = -depth_msg->vector.z;
+    double depth_var = 0.0001;
+    globalEstimator.inputDepth(t, depth, depth_var);
+}
+
+void compass_callback(const sensor_msgs::MagneticFieldConstPtr &compass_msg)
+{
+	double t = compass_msg->header.stamp.toSec();
+	//geometry_msgs::Vector3 mag_field = compass_msg->magnetic_field;
+	Eigen::Vector3d mag_field(compass_msg->magnetic_field.x, compass_msg->magnetic_field.y, compass_msg->magnetic_field.z);
+	double mag_var[9]; 
+	copy(begin(compass_msg->magnetic_field_covariance),end(compass_msg->magnetic_field_covariance), begin(mag_var));
+	globalEstimator.inputCompass(t, mag_field, mag_var);
+
+}
+
 void vio_callback(const nav_msgs::Odometry::ConstPtr &pose_msg)
 {
     //printf("vio_callback! \n");
@@ -170,6 +200,7 @@ int main(int argc, char **argv)
     std::string GPS_TOPIC;
     std::string PRESSURE_TOPIC;
     std::string COMPASS_TOPIC;
+
     
     string config_file = argv[1];
     printf("config_file: %s\n", argv[1]);
@@ -205,6 +236,7 @@ int main(int argc, char **argv)
     globalEstimator.mag_world_size = mag_world.norm();
     globalEstimator.mag_world_norm = mag_world.normalized();
 
+
     fsSettings.release();
 
     global_path = &globalEstimator.global_path;
@@ -233,6 +265,7 @@ int main(int argc, char **argv)
         std::cout << "subscribing to: " << COMPASS_TOPIC;
         printf("\n");
 	printf("mag field: %f %f %f \n", mag_world[0], mag_world[1], mag_world[2]);
+
 	    sub_compass = n.subscribe(COMPASS_TOPIC, 1000, compass_callback);
     } else {
         printf("no compass\n");
@@ -241,6 +274,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_vio = n.subscribe("/vins_estimator/odometry", 100, vio_callback);
     //ros::Subscriber sub_depth = n.subscribe("/bluerov2/pressure", 1000, pressure_callback);
     compass_counter = 0;
+
     //printf("sub_vio.topic: %s",sub_vio.topic);
     //printf("sub_depth.topic: %s",sub_depth.topic);
     pub_global_path = n.advertise<nav_msgs::Path>("global_path", 100);

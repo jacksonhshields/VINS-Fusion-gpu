@@ -42,6 +42,12 @@ void Estimator::setParameter()
     cout << "set g " << g.transpose() << endl;
     featureTracker.readIntrinsicParameter(CAM_NAMES);
 
+    if (USE_MASK)
+    {
+        featureTracker.loadMask(FISHEYE_MASK);
+
+    }
+
     std::cout << "MULTIPLE_THREAD is " << MULTIPLE_THREAD << '\n';
     if (MULTIPLE_THREAD)
     {
@@ -64,7 +70,11 @@ void Estimator::inputImage(double t, const cv::Mat &_img, const cv::Mat &_img1)
     //     sum_t_feature += featureTrackerTime.toc();
     //     printf("featureTracker time: %f\n", sum_t_feature/(float)inputImageCnt);
     // }
-    
+    if (SHOW_TRACK)
+    {
+        cv::Mat imgTrack = featureTracker.getTrackImage();
+        pubTrackImage(imgTrack, t);
+    }
     if(MULTIPLE_THREAD)  
     {     
         if(inputImageCnt % 2 == 0)

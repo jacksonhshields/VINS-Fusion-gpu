@@ -10,12 +10,17 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-    cv_bridge
+  cv_bridge
+  geometry_msgs
+  sensor_msgs
 )
 
 #find_package(OpenCV REQUIRED)
-include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
-
+#include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
+find_package(OpenCV REQUIRED
+NO_MODULE # should be optional, tells CMake to use config mode
+PATHS /usr/local # look here
+NO_DEFAULT_PATH) # and don't look anywhere else
 find_package(Ceres REQUIRED)
 
 add_subdirectory(./ThirdParty/GeographicLib/)
@@ -34,4 +39,4 @@ add_executable(global_fusion_node
 	src/globalOptNode.cpp
 	src/globalOpt.cpp)
 
-target_link_libraries(global_fusion_node ${catkin_LIBRARIES} ${CERES_LIBRARIES} libGeographiccc) 
+target_link_libraries(global_fusion_node ${catkin_LIBRARIES} ${CERES_LIBRARIES} libGeographiccc ${OpenCV_LIBS}) 

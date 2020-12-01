@@ -22,7 +22,7 @@ GlobalOptimization::GlobalOptimization()
 	newDepth = false;
 	newCompass = false;
 	WGPS_T_WVIO = Eigen::Matrix4d::Identity();
-    threadOpt = std::thread(&GlobalOptimization::optimize, this);
+    	threadOpt = std::thread(&GlobalOptimization::optimize, this);
 }
 
 GlobalOptimization::~GlobalOptimization()
@@ -118,12 +118,14 @@ void GlobalOptimization::inputCompass(double t, Eigen::Vector3d mag_field, doubl
 	mag_var[0] = 0.1;
     }
     if(fabs(mag_size-1.0) < 0.1){
+
         var = mag_var[0];
     } else {
         var = 10*mag_var[0];
     }
     Eigen::Vector3d mag_field_unit = mag_field.normalized();
     //printf("mag_field: %f %f %f \n",mag_field_unit[0],mag_field_unit[1],mag_field_unit[2]);
+
     vector<double> tmp{mag_field_unit[0], mag_field_unit[1], mag_field_unit[2], var};
     compassMap[t] = tmp;
 }
@@ -152,6 +154,7 @@ void GlobalOptimization::inputPressure(double t, double pressure, double pressur
 	    depthMap[t] = tmp;
 	    newDepth = true;
     }
+
 }
 
 
@@ -163,6 +166,7 @@ void GlobalOptimization::optimize()
         {
             //newGPS = false;
             printf("global optimization GPS: %d, Depth: %d, Compass: %d \n", newGPS, newDepth, newCompass);
+
             TicToc globalOptimizationTime;
 
             ceres::Problem problem;
@@ -198,6 +202,7 @@ void GlobalOptimization::optimize()
             }
 
             map<double, vector<double>>::iterator iterVIO, iterVIONext, iterGPS, iterDepth, iterDepthLower, iterDepthUpper, iterCompass;
+
             int i = 0;
             int num_depth = 0;
             for (iterVIO = localPoseMap.begin(); iterVIO != localPoseMap.end(); iterVIO++, i++)
@@ -277,6 +282,7 @@ void GlobalOptimization::optimize()
             newDepth = false;
             //printf("num_depth: %d \n", depthMap.size());
             //printf("num odom: %d \n", length);
+
             newCompass = false;
             //mPoseMap.unlock();
             ceres::Solve(options, &problem, &summary);

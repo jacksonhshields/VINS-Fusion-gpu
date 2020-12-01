@@ -43,6 +43,7 @@ public:
 	void inputPressure(double t, double pressure, double pressure_var);
 	void inputCompass(double t, Eigen::Vector3d mag_field, double mag_var[9]);
 	void inputOdom(double t, Eigen::Vector3d OdomP, Eigen::Quaterniond OdomQ);
+    void inputDepth(double t, double depth, double depth_var);
 	void getGlobalOdom(Eigen::Vector3d &odomP, Eigen::Quaterniond &odomQ);
 	nav_msgs::Path global_path;
 	float mag_world_size;
@@ -68,6 +69,7 @@ private:
 	bool initGPS;
 	bool initPress;
 	bool initCompass;
+
 	bool newGPS;
 	bool newDepth;
 	bool newCompass;
@@ -76,7 +78,8 @@ private:
 	Eigen::Matrix4d WGPS_T_WVIO;
 	Eigen::Vector3d lastP;
 	Eigen::Quaterniond lastQ;
-        Eigen::Vector3d mag_field_global_unit;
+  Eigen::Vector3d mag_field_global_unit;
+
 	std::thread threadOpt;
 
 };
