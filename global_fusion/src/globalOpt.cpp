@@ -131,7 +131,7 @@ void GlobalOptimization::inputCompass(double t, Eigen::Vector3d mag_field, doubl
 }
 
 void GlobalOptimization::inputPressure(double t, double pressure, double pressure_var)
-{   
+{
     //double density = 9.80638;
 	if(!initPress){
 		p_0 = 0.0;
@@ -142,17 +142,43 @@ void GlobalOptimization::inputPressure(double t, double pressure, double pressur
 		/* if(localPoseMap.size() > 0){
             initPress = true;
             double d_0 = localPoseMap.begin()->second[2];
-            p_0 += d_0 * density; 
+            p_0 += d_0 * density;
             //printf("p_0 intialise to %f at intial depth %f at intial pressure %f \n",p_0,d_0,pressure);
         }*/
 	}
-    
+
     if(initPress){
 	    depth = pressure_to_depth(pressure, density, p_0);
 	    vector<double> tmp{-depth, pressure_var/density};
 	    printf("depth: %f \n",depth);
 	    depthMap[t] = tmp;
 	    newDepth = true;
+    }
+
+}
+
+void GlobalOptimization::inputDepth(double t, double depth, double depth_var)
+{
+    //double density = 9.80638;
+    if(!initPress){
+        p_0 = 0.0;
+        imu_t_depth[0] = body_t_depth[0];
+        imu_t_depth[1] = body_t_depth[1];
+        imu_t_depth[2] = body_t_depth[2];
+        initPress = true;
+        /* if(localPoseMap.size() > 0){
+            initPress = true;
+            double d_0 = localPoseMap.begin()->second[2];
+            p_0 += d_0 * density;
+            //printf("p_0 intialise to %f at intial depth %f at intial pressure %f \n",p_0,d_0,pressure);
+        }*/
+    }
+
+    if(initPress){
+        vector<double> tmp{-depth, depth_var};
+        printf("depth: %f \n",depth);
+        depthMap[t] = tmp;
+        newDepth = true;
     }
 
 }

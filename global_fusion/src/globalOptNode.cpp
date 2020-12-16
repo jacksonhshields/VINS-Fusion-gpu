@@ -25,6 +25,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/eigen.hpp>
+#include "float_sensor_msgs/Depth.h"
 
 //#include "parameters.h"
 
@@ -115,23 +116,14 @@ void compass_callback(const geometry_msgs::Vector3StampedConstPtr &compass_msg)
 	compass_counter = 0;
 }
 
-void pressure_callback(const sensor_msgs::FluidPressureConstPtr &pressure_msg)
-{
-    //printf("pressure callback! \n");
-	double t = pressure_msg->header.stamp.toSec();
-	double pressure = pressure_msg->fluid_pressure;
-	double pressure_var = pressure_msg->variance;
-	globalEstimator.inputPressure(t, pressure, pressure_var);
-}
-
-void depth_callback(const geometry_msgs::Vector3StampedConstPtr &depth_msg)
+void depth_callback(const float_sensor_msgs::DepthConstPtr &depth_msg)
 {
     double t = depth_msg->header.stamp.toSec();
-    double depth = -depth_msg->vector.z;
+    double depth = depth_msg->depth;
     double depth_var = 0.0001;
     globalEstimator.inputDepth(t, depth, depth_var);
 }
-
+/*
 void compass_callback(const sensor_msgs::MagneticFieldConstPtr &compass_msg)
 {
 	double t = compass_msg->header.stamp.toSec();
@@ -141,7 +133,7 @@ void compass_callback(const sensor_msgs::MagneticFieldConstPtr &compass_msg)
 	copy(begin(compass_msg->magnetic_field_covariance),end(compass_msg->magnetic_field_covariance), begin(mag_var));
 	globalEstimator.inputCompass(t, mag_field, mag_var);
 
-}
+}*/
 
 void vio_callback(const nav_msgs::Odometry::ConstPtr &pose_msg)
 {
@@ -194,11 +186,13 @@ int main(int argc, char **argv)
     int USE_GPS;
     int USE_COMPASS;
     int USE_PRESSURE;
+    int USE_DEPTH;
     float density;
     Eigen::Vector3f mag_world;
 
     std::string GPS_TOPIC;
     std::string PRESSURE_TOPIC;
+    std::string DEPTH_TOPIC;
     std::string COMPASS_TOPIC;
 
     
@@ -213,9 +207,11 @@ int main(int argc, char **argv)
     USE_GPS = fsSettings["use_gps"];
     USE_COMPASS = fsSettings["use_compass"];
     USE_PRESSURE = fsSettings["use_pressure"];
+    USE_DEPTH = fsSettings["use_depth"];
     fsSettings["gps_topic"] >> GPS_TOPIC;
     
     fsSettings["pressure_topic"] >> PRESSURE_TOPIC;
+    fsSettings["depth_topic"] >> DEPTH_TOPIC;
     fsSettings["density"] >> density;
     globalEstimator.density = density;
     cv::Mat body_t_depth;
@@ -242,6 +238,7 @@ int main(int argc, char **argv)
     global_path = &globalEstimator.global_path;
     
     ros::Subscriber sub_GPS;
+    ros::Subscriber sub_pressure;
     ros::Subscriber sub_depth;
     ros::Subscriber sub_compass;
 
@@ -257,19 +254,26 @@ int main(int argc, char **argv)
         std::cout << "subscribing to: " << PRESSURE_TOPIC;
         printf("\n");
 	printf("density: %f\n", globalEstimator.density);
-    	sub_depth = n.subscribe(PRESSURE_TOPIC, 1000, pressure_callback);
+        sub_pressure = n.subscribe(PRESSURE_TOPIC, 1000, pressure_callback);
     } else {
         printf("no depth\n");
     }
     if(USE_COMPASS){
         std::cout << "subscribing to: " << COMPASS_TOPIC;
         printf("\n");
-	printf("mag field: %f %f %f \n", mag_world[0], mag_world[1], mag_world[2]);
-
+	    printf("mag field: %f %f %f \n", mag_world[0], mag_world[1], mag_world[2]);
 	    sub_compass = n.subscribe(COMPASS_TOPIC, 1000, compass_callback);
     } else {
         printf("no compass\n");
     }
+    if (USE_DEPTH){
+        std::cout << "subscribing to: " << DEPTH_TOPIC;
+        printf("\n");
+        sub_depth = n.subscribe(DEPTH_TOPIC, 1000, depth_callback);
+    } else {
+        printf("no depth\n");
+    }
+
     printf("subscribing to /vins_estimator/odometry \n");
     ros::Subscriber sub_vio = n.subscribe("/vins_estimator/odometry", 100, vio_callback);
     //ros::Subscriber sub_depth = n.subscribe("/bluerov2/pressure", 1000, pressure_callback);

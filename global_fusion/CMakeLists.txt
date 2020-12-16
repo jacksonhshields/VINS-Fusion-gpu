@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   geometry_msgs
   sensor_msgs
+		float_sensor_msgs
 )
 
 #find_package(OpenCV REQUIRED)

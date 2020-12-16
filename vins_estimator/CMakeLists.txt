@@ -14,20 +14,15 @@ find_package(catkin REQUIRED COMPONENTS
     tf
     cv_bridge
     camera_models
-    image_transport)
+    image_transport
+        )
 
-<<<<<<< HEAD
-find_package(OpenCV REQUIRED)
-#include(/home/dji/opencv/build/OpenCVConfig.cmake)
-=======
-#find_package(OpenCV REQUIRED)
 find_package(OpenCV REQUIRED
 NO_MODULE # should be optional, tells CMake to use config mode
 PATHS /usr/local # look here
 NO_DEFAULT_PATH) # and don't look anywhere else
 
 #include(/usr/local/share/OpenCV/OpenCVConfig.cmake)
->>>>>>> depth
 message(WARNING "OpenCV_VERSION: ${OpenCV_VERSION}")
 
 find_package(Ceres REQUIRED)
